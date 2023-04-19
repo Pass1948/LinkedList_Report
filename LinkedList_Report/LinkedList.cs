@@ -149,11 +149,9 @@ namespace LinkedList_Report
             if (node.next != null)                      // 기존노드의 다음노드가 없을경우 (tail인 경우)
                 node.next.prev = newNode;               // 기존노드에 다음노드가 새로운 노드의 이전노드와 연결
             else
-                tail = newNode;                         // 이전노드가 있지만 첫번째인경우를 생각하여 새로운 노드를 head로 한다
+                tail = newNode;                         // 다음노드가 있지만 마지막인경우를 생각하여 새로운 노드를 tail로 한다
 
-            // 3. 갯수 증가
             count++;
-
             return newNode;
         }
 
