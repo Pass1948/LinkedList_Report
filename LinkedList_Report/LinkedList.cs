@@ -11,15 +11,15 @@ namespace LinkedList_Report
         internal LinkedList<T> list;         // 어느 연결리스트에 소속되어있는지 알기 위해 리스트 초기화
         internal LinkedListNode<T> prev;     // 이전 데이터 주소와 연결된 노드
         internal LinkedListNode<T> next;     // 다음 데이터 주소와 연결된 노드
-        public T Date;                      // 두 노드 사이에 값(데이터)
+        public T Value;                      // 두 노드 사이에 값(데이터)
 
         // 오버로딩의 통해 해당 변수들의 값을 있을경우 없을경우를 다 고려하여 생성자 3가지를 만들어 대처한다
-        public LinkedListNode(T date)
+        public LinkedListNode(T value)
         {
             this.list = null;
             this.prev = null;
             this.next = null;
-            this.Date = date;
+            this.Value = value;
         }
 
         public LinkedListNode(LinkedList<T> list, T date)
@@ -27,7 +27,7 @@ namespace LinkedList_Report
             this.list = list;
             this.prev = null;
             this.next = null;
-            this.Date = date;
+            this.Value = date;
         }
 
         public LinkedListNode(LinkedList<T> list, LinkedListNode<T> prev, LinkedListNode<T> next, T date)
@@ -35,13 +35,13 @@ namespace LinkedList_Report
             this.list = list;
             this.prev = prev;
             this.next = next;
-            this.Date = date;
+            this.Value = date;
         }
 
         public LinkedList<T> List { get { return list; } }              // 배열의 읽기 가능하게 구현 (외부에서는 읽기만 가능하게 내부에서는 수정가능케 설정)
         public LinkedListNode<T> Prev { get { return prev; } }          // 이전노드에 읽기용으로 구현
         public LinkedListNode<T> Next { get { return next; } }          // 다음노드에 읽기용으로 구현
-        public T Item { get { return Date; } set { Date = value; } }    // 데이터도 내부에서만 수정가능하게 구현
+        public T Item { get { return Value; } set { Value = value; } }    // 데이터도 내부에서만 수정가능하게 구현
 
     }
 
@@ -155,42 +155,36 @@ namespace LinkedList_Report
             return newNode;
         }
 
-        //Remove
+        // 노드삭제 함수 구현==============================================================================
         public void Remove(LinkedListNode<T> node)
         {
-            // 예외1: 노드가 연결리스트에 포함된 노드가 아닌경우
-            if (node.list != this)  // 다른 리스트의 것을 지우지않게 이뤄지게 예외처리를 구현
+            // 다른리스트 간섭과 null일경우를 대비해서 예외처리 진행
+            if (node.list != this)  
                 throw new InvalidOperationException();
-            // 예외 2 : 노드가 null인 경우
             if (node == null)
                 throw new ArgumentNullException();
 
-            // 0.제거한 것이 head나 tail이 변경되는 경우 적용
-            if (head == node)
-                head = node.next;
-            if (tail == node)
-                tail = node.prev;
+            if (head == node)               // 제거되는 노드가 head일경우
+                head = node.next;           // 삭제되는 노드에 연결된 다음노드의 데이터의 노드를 head로 대입
+            if (tail == node)               // 제거되는 노드가 tail일경우
+                tail = node.prev;           // 삭제되는 노드에 연결된 이전 노드의 데이터의 노드를 tail로 대입
 
-            // 1. 연결 구조를 바꾸기
-            // 이전 데이터노드가 있을때만
-            if (node.prev != null)
-                node.prev.next = node.next;
-            // 해당 데이터 노드의 이전데이터의 다음데이터노드를 해당 데이터의 다음데이터노드 역할을 하게 대입하여 변경 
-
-            // 다음 데이터노드가 있을때만
-            if (node.next != null)
-                node.next.prev = node.prev;
-
-            // 2. 갯수 줄이기
+            // 삭제되는 노드의 양쪽 노드들을 연결하기 위해 연결구성 변경과정을 진행해야함
+            if (node.prev != null)          // 이전 노드가 null이 아닐경우 
+                node.prev.next = node.next; // 삭제되는 다음노드를 이전데이터의 다음노드로 교체
+            if (node.next != null)          // 다음 노드가 null이 아닐경우 
+                node.next.prev = node.prev; // 삭제되는 이전노드를 다음데이터의 이전노드로 교체
             count--;
         }
 
-        public bool Remove(T value)
+        // 삭제하는게 값인경우==============================================================================
+        public bool RemoveValue(T value)
         {
-            LinkedListNode<T>? findnode = Find(value); // 찾기
-            if (findnode != null)
+            LinkedListNode<T>? findnode = FindValue(value); // 불연속적인 특성때문에 조건을 찾는 과정이 처음부터 해당데이터까지 탐색을 해야하기에 Find가 필요함
+                                                            // 값을 찾는거여서 FindValue로 표기
+            if (findnode != null)                           // 찾은 값이 null이 아닌경우 삭제를 진행함
             {
-                Remove(findnode);       // 찾은경우 삭제
+                Remove(findnode);       
                 return true;
             }
             else
@@ -198,46 +192,45 @@ namespace LinkedList_Report
                 return false;
             }
         }
-        // 노드로 지우기
-        public bool RemoveNode(LinkedListNode<T> node)
+        // 해당 데이터(값) 찾기==============================================================================
+        public LinkedListNode<T> FindValue(T value)
         {
-            LinkedListNode<T>? findnode = FindNode(node); // 찾기
-            if (findnode != null)
-            {
-                Remove(findnode);       // 찾은경우 삭제
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        // 해당 데이터 찾기
-        public LinkedListNode<T> Find(T value)
-        {
-            LinkedListNode<T> target = head;
+            LinkedListNode<T> target = head;                            // 처음부터 탐색을 시작해야 하기에 타겟을 배열의 처음인 head로 설정
             EqualityComparer<T> comparer = EqualityComparer<T>.Default; // 값형식의 경우 값만 같으면 같다고 생각된다, 참조형식인경우 주소값만 같으면 같다고 함
 
-            while (target != null)          // 찾을때 까지 돌려다 하니 while반복으로 진행
+            while (target != null)                                      // 찾을때 까지 탐색을 진행해야 해서 while반복문으로 진행
             {
-                if (comparer.Equals(value, target.Date))
-                    return target;
+                if (comparer.Equals(value, target.Value))               // 타겟의 값과 해당데이터의 값비교
+                    return target;                                      // 찾을경우 타겟 반환
                 else
-                    target = target.next;
+                    target = target.next;                               // 아닐경우 다음으로 이동
             }
 
             return null;
         }
 
-        // 해당 노드 찾기
-        public LinkedListNode<T> FindNode(LinkedListNode<T> node)
+        // 삭제하는게 노드인경우==============================================================================
+        public bool RemoveNode(LinkedListNode<T> node)
         {
-            LinkedListNode<T> target = head;
-
-            while (target != null)          // 찾을때 까지 돌려다 하니 while반복으로 진행
+            LinkedListNode<T>? findnode = FindNode(node);               // 노드용 Find를 사용
+            if (findnode != null)
             {
-                if (node == target)
+                Remove(findnode);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        // 해당 노드 찾기
+        public LinkedListNode<T> FindNode(LinkedListNode<T> node)      // 값용 find를 노드제거 함수에 사용할수 없어서 별도로 구현
+        {
+            LinkedListNode<T> target = head;                           // 메커니즘은 동일하다
+
+            while (target != null)         
+            {
+                if (node == target)                                     // 타겟도 노드여서 해당 노드와 비교하는 간단한 식으로 가능함
                     return target;
                 else
                     target = target.next;

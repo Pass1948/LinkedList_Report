@@ -19,13 +19,7 @@
 
         static void Main(string[] args)
         {
-            LinkedList_Report.LinkedList<int> linkedList = new LinkedList_Report.LinkedList<int>();
-
-            linkedList.AddFirst(0);
-            linkedList.AddFirst(1);
-            linkedList.AddFirst(2);
-            linkedList.AddFirst(3);
-            linkedList.AddFirst(4);
+            
         }
     }
 }
